@@ -8,7 +8,7 @@
 
 #import "UITextField+Line.h"
 
-#define lineColor RGB(228, 228, 228)
+#define lineColor RGB(226, 226, 226)
 
 @implementation UITextField (Line)
 

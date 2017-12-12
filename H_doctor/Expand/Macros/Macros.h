@@ -51,6 +51,8 @@
 #define BOLDSYSTEMFONT(FONTSIZE)[UIFont boldSystemFontOfSize:FONTSIZE]
 #define SYSTEMFONT(FONTSIZE)    [UIFont systemFontOfSize:FONTSIZE]
 #define FONT(NAME, FONTSIZE)    [UIFont fontWithName:(NAME) size:(FONTSIZE)]
+#define PingFangFONT(FONTSIZE)    [UIFont fontWithName:(@"PingFang SC") size:(FONTSIZE)]
+
 
 // 当前版本
 #define FSystemVersion          ([[[UIDevice currentDevice] systemVersion] floatValue])

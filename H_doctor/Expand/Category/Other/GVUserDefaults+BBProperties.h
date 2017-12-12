@@ -8,7 +8,7 @@
 
 #import "GVUserDefaults.h"
 
-#define HospitalUserDefault [GVUserDefaults standardUserDefaults]
+#define DoctorUserDefault [GVUserDefaults standardUserDefaults]
 
 typedef NS_ENUM(NSUInteger, LineState) {
     askLine = 0,

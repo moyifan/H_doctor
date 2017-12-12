@@ -12,6 +12,11 @@
 
 @property (strong, nonatomic) UIWindow *window;
 
+// 跳转首页
+-(void)setUpHomeViewController;
+
+// 跳转登录页
+-(void)setupLoginViewController;
 
 @end
 

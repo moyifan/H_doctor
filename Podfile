@@ -3,6 +3,7 @@ platform :ios, "8.0"
 target ‘H_doctor’ do
 
 pod 'CYLTabBarController'
+pod 'EasyNavigation','~>1.0.1'
 pod 'YTKNetwork'
 pod 'SDAutoLayout'
 pod 'MBProgressHUD'
