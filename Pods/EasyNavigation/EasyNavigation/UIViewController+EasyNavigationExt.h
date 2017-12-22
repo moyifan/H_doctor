@@ -26,6 +26,29 @@
  */
 @property (nonatomic,strong)EasyNavigationView *navigationView ;
 
+/**
+ * 导航栏初始高度（刚初始化页面，没有对导航条操作是的高度） 注意与导航条(self.navigationView.height)的区别。
+ *
+ * 竖屏：statusBar的高度 + 正常高度 + 大标题高度(如果显示)
+ * 横屏：statusBar的高度(如果显示) + 正常高度
+ */
+@property (nonatomic,assign,readonly)CGFloat navigationOrginalHeight ;
+/**
+ * 是否正在展示大标题
+ */
+@property (nonatomic,assign,readonly)BOOL isShowBigTitle ;
+
+
+/**
+ * 当前控制器大标题类型
+ */
+@property (assign)NavBigTitleType navbigTitleType ;
+/**
+ * 当前控制器大标题移动动画类型
+ */
+@property (assign)NavTitleAnimationType navTitleAnimationType ;
+
+
 
 /**
  * 当前控制器 是否 禁止侧滑返回
@@ -57,6 +80,10 @@
  */
 @property (nonatomic,assign)BOOL statusBarHidden ;
 
+/**
+ * 横屏的时候是否显示状态栏 (默认为不显示)
+ */
+@property (nonatomic,assign)BOOL horizontalScreenShowStatusBar ;
 
 /**
  * 处理侧滑返回手势

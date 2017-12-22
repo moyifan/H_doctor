@@ -12,14 +12,16 @@
 #import "EasyNavigationView.h"
 #import "UIViewController+EasyNavigationExt.h"
 #import "UIView+EasyNavigationExt.h"
-
+#import "EasyNavigationView+LeftButton.h"
 
 
 @interface EasyNavigationController ()<UINavigationControllerDelegate,UIGestureRecognizerDelegate>
 
+@property (nonatomic,strong)UIPanGestureRecognizer *customBackGesture ;//自定义侧滑返回
+@property (nonatomic,strong)EasyCustomBackGestureDelegate *customBackGestureDelegate ;//自定义返回的代理
+
 
 @property (nonatomic,strong)UINavigationBar *tempNavBar ;
-
 
 @property (nonatomic,weak)id systemGestureTarget ;
 
@@ -29,11 +31,8 @@
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil
-     ];
-    
+    EasyNotificationRemove(UIApplicationWillChangeStatusBarFrameNotification) ;
     [[UIDevice currentDevice]endGeneratingDeviceOrientationNotifications];
-    
 }
 
 - (void)viewDidLoad
@@ -42,17 +41,13 @@
     
     self.navigationBarHidden = NO ;
     self.navigationBar.hidden = YES ;
-    
     self.delegate = self ;
 
     self.systemGestureTarget = self.interactivePopGestureRecognizer.delegate ;
-    [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
-
 
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeviceOrientationDidChange:) name:UIDeviceOrientationDidChangeNotification object:nil
-     ];
+
+    EasyNotificationAdd(statusBarChangeNoti:, UIApplicationDidChangeStatusBarFrameNotification) ;
 
 }
 
@@ -65,36 +60,79 @@
     
     //重新处理手势
     [viewController dealSlidingGestureDelegate];
+}
+- (void)navigationController:(UINavigationController *)navigationController didShowViewController:(UIViewController *)viewController animated:(BOOL)animated
+{
     
 }
-
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
     if (self.viewControllers.count > 0 ) {
         viewController.hidesBottomBarWhenPushed = YES;
     }
     
-    viewController.navigationView = [[EasyNavigationView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH , NAV_HEIGHT)];
-    
-    kWeakSelf(self)
-    if (self.viewControllers.count > 0) {
-        
-        // 图片路径
-        UIImage *img = [UIImage imageNamed:EasyImageFile(@"nav_btn_back.png")] ;
-        [viewController.navigationView addLeftButtonWithImage:img  clickCallBack:^(UIView *view) {
-             [weakself popViewControllerAnimated:YES];
-        }];
+    // 为了避免点击button多次push控制器的问题
+    if (![[super topViewController] isKindOfClass:[viewController class]]) {  // 如果和上一个控制器一样，隔绝此操作
+        [super pushViewController:viewController animated:animated];
     }
     
+//    [super pushViewController:viewController animated:animated];
+
+    viewController.navigationView = [[EasyNavigationView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH , viewController.navigationOrginalHeight)];
     [viewController.view addSubview:viewController.navigationView];
-
-    [super pushViewController:viewController animated:animated];
-
     
+    EasyLog(@"EasyNavigation create : %p",viewController.navigationView);
+    if (self.viewControllers.count > 1) {
+//        kWeakSelf(self)
+//        UIImage *img = [UIImage imageNamed:EasyImageFile(@"nav_btn_back.png")] ;
+//       UIButton *backButton = [viewController.navigationView addLeftButtonWithTitle:@"     " image:img clickCallBack:^(UIView *view) {
+//            [weakself popViewControllerAnimated:YES];
+//        }];
+#warning 此处屏蔽自带导航栏
+        
+//        viewController.navigationView.backButton = backButton ;
+    }
+
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        EasyNavigationView  *navView = self.topViewController.navigationView ;
+        if (navView.width != self.topViewController.view.width) {
+            navView.width = self.topViewController.view.width ;
+        }
+    });
+    
+}
+
+
+
+
+
+- (void)statusBarChangeNoti:(NSNotification *)notifycation
+{
+
+    [self setNeedsStatusBarAppearanceUpdate];
+
     EasyNavigationView  *navView = self.topViewController.navigationView ;
+    if (!navView)  return ;
+    
     if (navView.width != self.topViewController.view.width) {
         navView.width = self.topViewController.view.width ;
     }
+
+    [navView layoutNavSubViews];
+
+    UIDevice *device = [UIDevice currentDevice] ;
+
+    if (device.orientation == UIDeviceOrientationPortrait || device.orientation == UIDeviceOrientationPortraitUpsideDown) {
+        NSLog(@"竖屏 ====== %f , %f",self.topViewController.view.width ,self.topViewController.navigationView.height);
+    }
+    else if ([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeLeft || [[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeRight) {
+        NSLog(@"横屏====== %f , %f",self.topViewController.view.width ,self.topViewController.navigationView.height);
+    }
+    else{
+        NSLog(@"未知状态====== %zd",device.orientation );
+    }
+    
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle
@@ -103,77 +141,7 @@
 }
 
 
-
-- (void)pushViewControllerRetro:(UIViewController *)viewController {
-    CATransition *transition = [CATransition animation];
-    transition.duration = 1.25;
-    transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    transition.type = kCATransitionPush;
-    transition.subtype = kCATransitionFromRight;
-    [self.view.layer addAnimation:transition forKey:nil];
-    
-    [self pushViewController:viewController animated:NO];
-}
-
-- (void)popViewControllerRetro {
-    CATransition *transition = [CATransition animation];
-    transition.duration = 0.25;
-    transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    transition.type = kCATransitionPush;
-    transition.subtype = kCATransitionFromLeft;
-    [self.view.layer addAnimation:transition forKey:nil];
-    
-    [self popViewControllerAnimated:NO];
-}
-
-
-- (void)handleDeviceOrientationDidChange:(UIInterfaceOrientation)interfaceOrientation
-{
-    
-    EasyNavigationView  *navView = self.topViewController.navigationView ;
-    if (nil == navView) {
-        return ;
-    }
-    
-    if (navView.width != self.topViewController.view.width) {
-        navView.width = self.topViewController.view.width ;
-    }
-    [self setNeedsStatusBarAppearanceUpdate];
-    
-    //1.获取 当前设备 实例
-    UIDevice *device = [UIDevice currentDevice] ;
-    
-//    EasyLog(@" %@ = %@",NSStringFromCGRect(self.topViewController.view.frame) , NSStringFromCGRect(navView.frame));
-    
-//    switch (device.orientation) {
-//        case UIDeviceOrientationUnknown: EasyLog(@"未知方向"); break;
-//
-//        case UIDeviceOrientationFaceUp: EasyLog(@"屏幕朝上平躺"); break;
-//
-//        case UIDeviceOrientationFaceDown:  EasyLog(@"屏幕朝下平躺");  break;
-//
-//        case UIDeviceOrientationLandscapeLeft: EasyLog(@"屏幕向左横置");  break;
-//
-//        case UIDeviceOrientationLandscapeRight: EasyLog(@"屏幕向右橫置"); break;
-//
-//        case UIDeviceOrientationPortrait:  EasyLog(@"屏幕直立");  break;
-//
-//        case UIDeviceOrientationPortraitUpsideDown: EasyLog(@"屏幕直立，上下位置调换了");  break;
-//
-//        default: EasyLog(@"无法辨识"); break;
-//    }
-    
-}
-
-
 #pragma mark - getter
-//- (NSMutableDictionary *)navBarDictionary
-//{
-//    if (nil == _navBarDictionary) {
-//        _navBarDictionary  = [NSMutableDictionary dictionaryWithCapacity:10];
-//    }
-//    return _navBarDictionary ;
-//}
 
 - (UIPanGestureRecognizer *)customBackGesture
 {

@@ -187,11 +187,11 @@ UIColor *CellRightTextColor = nil;
     
     if (self.style & 0x1000)
     {
-        CGSize leftLabelSize = [self.leftLabel.text sizeWithAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:kLeftLabelFont]}];
+        CGSize leftLabelSize = [self.leftLabel.text sizeWithAttributes:@{NSFontAttributeName:PingFangFONT(kLeftLabelFont)}];
         CGFloat leftLabelWidth  = leftLabelSize.width;
         CGFloat leftLabelHeight = leftLabelSize.height;
         if (_leftIcon)
-        {   NSLog(@"来错了");
+        {   
             CGFloat leftLabelX = self.leftIcon.frame.origin.x + self.leftIcon.bounds.size.width + kPadding;
             CGFloat leftLabelY = (kSelfHeight - leftLabelHeight - kBottomLineHeight) / 2.0;
             self.leftLabel.frame = CGRectMake(leftLabelX, leftLabelY, leftLabelWidth, leftLabelHeight);
@@ -219,7 +219,7 @@ UIColor *CellRightTextColor = nil;
     if (self.style & 0x10)
     {
 
-        CGSize rightLabelSize = [self.rightLabel.text sizeWithAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:kRightLabelFont]}];
+        CGSize rightLabelSize = [self.rightLabel.text sizeWithAttributes:@{NSFontAttributeName:PingFangFONT(kRightLabelFont)}];
         CGFloat rightLabelWidth  = rightLabelSize.width;
         CGFloat rightLabelHeight = rightLabelSize.height;
         if (rightTmpView)
@@ -239,8 +239,8 @@ UIColor *CellRightTextColor = nil;
     
     if (self.style & 0x100)
     {
-        CGFloat rightIconWidth  = AdaptedWidth(50);
-        CGFloat rightIconHeight = AdaptedWidth(50);
+        CGFloat rightIconWidth  = 50;
+        CGFloat rightIconHeight = 50;
         if (rightTmpView)
         {
             CGFloat rightIconX = rightTmpView.frame.origin.x - kPadding - rightIconWidth;
@@ -306,7 +306,7 @@ UIColor *CellRightTextColor = nil;
 - (UILabel *)leftLabel {
     if (_leftLabel == nil) {
         _leftLabel = [UILabel new];
-        _leftLabel.font = [UIFont systemFontOfSize:kLeftLabelFont];
+        _leftLabel.font = PingFangFONT(kLeftLabelFont);
         _leftLabel.textColor = CellLeftTextColor;
     }
     return _leftLabel;
@@ -330,7 +330,7 @@ UIColor *CellRightTextColor = nil;
 - (UILabel *)rightLabel {
     if (_rightLabel == nil) {
         _rightLabel = [UILabel new];
-        _rightLabel.font = [UIFont systemFontOfSize:kRightLabelFont];
+        _rightLabel.font = PingFangFONT(kRightLabelFont);
         _rightLabel.textColor = CellRightTextColor;
     }
     return _rightLabel;

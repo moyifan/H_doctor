@@ -39,10 +39,8 @@
 
 
 
-#import "AskHomeViewController.h"
-#import "ShoppingHomeViewController.h"
-#import "HealthyHomeViewController.h"
-#import "MineHomeViewController.h"
+#import "PatientViewController.h"
+#import "MineViewController.h"
 #import "HomeViewController.h"
 
 @interface TabBarConfig ()
@@ -53,6 +51,7 @@
 
 
 @implementation TabBarConfig
+
 
 
 - (CYLTabBarController *)tabBarController {
@@ -74,29 +73,21 @@
 
 - (NSArray *)viewControllers {
 
-    AskHomeViewController *ask = [[AskHomeViewController alloc] init];
-    BaseNavigationController *firstNav = [[BaseNavigationController alloc] initWithRootViewController:ask];
-    
-    ShoppingHomeViewController *shopping = [[ShoppingHomeViewController alloc] init];
-    BaseNavigationController *secondNav = [[BaseNavigationController alloc] initWithRootViewController:shopping];
-    
-//    HomeViewController *home = [[HomeViewController alloc] init];
-//    BaseNavigationController *thirdNav = [[BaseNavigationController alloc] initWithRootViewController:home];
-    
-    HealthyHomeViewController *healthy = [[HealthyHomeViewController alloc] init];
-    BaseNavigationController *thirdNav = [[BaseNavigationController alloc] initWithRootViewController:healthy];
-    
-    MineHomeViewController *mine = [[MineHomeViewController alloc] init];
-    BaseNavigationController *fourthlyNav = [[BaseNavigationController alloc] initWithRootViewController:mine];
+    HomeViewController *home = [[HomeViewController alloc] init];
+    EasyNavigationController *firstNav = [[EasyNavigationController alloc] initWithRootViewController:home];
 
+    PatientViewController *patient = [[PatientViewController alloc] init];
+    EasyNavigationController *secondNav = [[EasyNavigationController alloc] initWithRootViewController:patient];
+
+    MineViewController *mine = [[MineViewController alloc] init];
+    EasyNavigationController *thirdNav = [[EasyNavigationController alloc] initWithRootViewController:mine];
+
+    
     NSArray *viewControllers = @[firstNav,
                                  secondNav,
                                  thirdNav,
-                                 fourthlyNav
-//                                 fiveNav
                                  ];
 
-    
     return viewControllers;
 
 }
@@ -108,38 +99,25 @@
 {
 
     NSDictionary *dict1 = @{
-                            CYLTabBarItemTitle : @"在线问诊",
-                            CYLTabBarItemImage : @"zhenduan_icon",
-                            CYLTabBarItemSelectedImage : @"zhenduan_icon_n",
+                            CYLTabBarItemTitle : @"首页",
+                            CYLTabBarItemImage : @"shouye_icon",
+                            CYLTabBarItemSelectedImage : @"shouye_n_icon",
                             };
-    
+
     NSDictionary *dict2 = @{
-                            CYLTabBarItemTitle : @"药品商城",
-                            CYLTabBarItemImage : @"gouwuche_icon",
-                            CYLTabBarItemSelectedImage : @"gouwuche_icon_n",
+                            CYLTabBarItemTitle : @"我的患者",
+                            CYLTabBarItemImage : @"wodehuanzhe_icon",
+                            CYLTabBarItemSelectedImage : @"wodehuanzhe_n_icon",
                             };
-    
-//    NSDictionary *dict3 = @{
-//                            CYLTabBarItemTitle : @"首页",
-//                            CYLTabBarItemImage : @"home",
-//                            CYLTabBarItemSelectedImage : @"home_s",
-//                            };
     
     NSDictionary *dict3 = @{
-                            CYLTabBarItemTitle : @"健康管理",
-                            CYLTabBarItemImage : @"benzi_icon",
-                            CYLTabBarItemSelectedImage : @"benzi_icon_n",
-                            };
-    
-    NSDictionary *dict4 = @{
                             CYLTabBarItemTitle : @"我的",
                             CYLTabBarItemImage : @"mine_icon",
-                            CYLTabBarItemSelectedImage : @"mine_icon_n",
+                            CYLTabBarItemSelectedImage : @"mine_n_icon",
                             };
     
     
-    
-    NSArray *tabBarItemsAttributes = @[dict1,dict2,dict3,dict4];
+    NSArray *tabBarItemsAttributes = @[dict1,dict2,dict3];
     
     return tabBarItemsAttributes;
 

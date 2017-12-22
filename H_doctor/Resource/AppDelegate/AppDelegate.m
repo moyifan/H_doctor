@@ -73,7 +73,10 @@
     options.buttonTitleColor = [UIColor whiteColor];
     options.navBackgroundImage = [UIImage imageNamed:@"bg_na"];
 
+    
+//    EasyNavigationView
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+
 
 }
 

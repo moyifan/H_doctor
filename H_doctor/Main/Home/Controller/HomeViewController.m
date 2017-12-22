@@ -28,19 +28,17 @@
 
 -(void)setNavBar
 {
-    self.statusBarStyle = UIStatusBarStyleLightContent;
+
     [self.navigationView setNavigationBackgroundAlpha:0];
     
     [self.navigationView setTitle:@"科医大医生"];
     
     
     MPWeakSelf(self)
-    UIButton *left  =[UIButton buttonWithType:UIButtonTypeCustom];
-    [left setTitle:@"统计" forState:UIControlStateNormal];
-    left.titleLabel.font = PingFangFONT(16);
-    [self.navigationView addLeftView:left clickCallback:^(UIView *view) {
+    [self.navigationView addLeftButtonWithTitle:@"统计" clickCallBack:^(UIView *view) {
         
     }];
+   
     
     [self.navigationView addRightButtonWithImage:[UIImage imageNamed:@"news_icon"] hightImage:nil clickCallBack:^(UIView *view) {
     }];

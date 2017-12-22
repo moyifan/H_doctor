@@ -10,6 +10,7 @@
 #import "UIViewController+EasyNavigationExt.h"
 
 #import "EasyNavigationController.h"
+#import "EasyUtils.h"
 #import <objc/runtime.h>
 
 
@@ -68,6 +69,71 @@
     objc_setAssociatedObject(self, @selector(navigationView), navigationView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
+- (CGFloat)navigationOrginalHeight
+{
+    CGFloat orginalHeight = STATUSBAR_HEIGHT + kNavNormalHeight ;
+    
+    if (self.isShowBigTitle) {
+        CGFloat additionalHeight = ISHORIZONTALSCREEM ? 0 : kNavBigTitleHeight ;
+        return orginalHeight + additionalHeight ;
+    }
+    
+    return orginalHeight ;
+}
+
+- (BOOL)isShowBigTitle
+{
+    if (ISHORIZONTALSCREEM) {//如果屏幕是水平方向，不要大标题
+        return NO ;
+    }
+    
+    BOOL shouldShow = NO ;
+    switch (self.navbigTitleType) {
+        case NavBigTitleTypeIOS11:
+            shouldShow = IS_IOS11_OR_LATER ;
+            break;
+        case NavBigTitleTypePlus:
+            shouldShow = ISIPHONE_6P ;
+            break ;
+        case NavBigTitleTypeIphoneX:
+            shouldShow = ISIPHONE_X ;
+            break ;
+        case NavBigTitleTypeAll :
+            shouldShow = YES ;
+            break ;
+        case NavBigTitleTypePlusOrX:
+            shouldShow = ISIPHONE_X || ISIPHONE_6P ;
+            break ;
+        default:
+            break;
+    }
+    return shouldShow ;
+}
+
+- (NavBigTitleType)navbigTitleType
+{
+    return [objc_getAssociatedObject(self, _cmd) integerValue];
+}
+- (void)setNavbigTitleType:(NavBigTitleType)navbigTitleType
+{
+    objc_setAssociatedObject(self, @selector(navbigTitleType), @(navbigTitleType), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    //设置大标题的时候，通知导航条刷新高度
+    if (self.navigationView) {
+        [self.navigationView layoutNavSubViews];
+    }
+}
+
+- (NavTitleAnimationType)navTitleAnimationType
+{
+    return [objc_getAssociatedObject(self, _cmd) integerValue];
+}
+- (void)setNavTitleAnimationType:(NavTitleAnimationType)navTitleAnimationType
+{
+    objc_setAssociatedObject(self, @selector(navTitleAnimationType), @(navTitleAnimationType), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+
 - (UIStatusBarStyle)statusBarStyle
 {
     return [objc_getAssociatedObject(self, _cmd) integerValue] ;
@@ -99,39 +165,53 @@
     [self setNeedsStatusBarAppearanceUpdate];
 }
 
+- (BOOL)horizontalScreenShowStatusBar
+{
+    return [objc_getAssociatedObject(self, _cmd) boolValue] ;
+}
+
+-(void)setHorizontalScreenShowStatusBar:(BOOL)horizontalScreenShowStatusBar
+{
+    if (self.horizontalScreenShowStatusBar == horizontalScreenShowStatusBar) {
+        return ;
+    }
+    objc_setAssociatedObject(self, @selector(horizontalScreenShowStatusBar), @(horizontalScreenShowStatusBar), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    [self setNeedsStatusBarAppearanceUpdate];
+}
+
 - (void)dealSlidingGestureDelegate
 {
     EasyNavigationController *navController = (EasyNavigationController *)self.navigationController ;
-    if (nil != navController) {
-        if (self.disableSlidingBackGesture) {
-            navController.interactivePopGestureRecognizer.delegate = nil ;
-            navController.interactivePopGestureRecognizer.enabled = NO ;
-        }
-        else{
-            
-            navController.interactivePopGestureRecognizer.delegate = navController ;
-            navController.interactivePopGestureRecognizer.enabled = YES ;
-            
-            if (self.customBackGestureEnabel) {
-                
-                [navController.interactivePopGestureRecognizer.view addGestureRecognizer:navController.customBackGesture];
-                
-                navController.customBackGesture.delegate = navController.customBackGestureDelegate ;
-                
-                navController.interactivePopGestureRecognizer.delegate = nil;
-                navController.interactivePopGestureRecognizer.enabled  = NO;
-            }
-            
-        }
+    if (nil == navController) {
+        return ;
     }
     
+    if (self.disableSlidingBackGesture) {
+        navController.interactivePopGestureRecognizer.delegate = nil ;
+        navController.interactivePopGestureRecognizer.enabled = NO ;
+        return ;
+    }
+    
+    navController.interactivePopGestureRecognizer.delegate = navController ;
+    navController.interactivePopGestureRecognizer.enabled = YES ;
+    
+    if (self.customBackGestureEnabel) {
+        
+        [navController.interactivePopGestureRecognizer.view addGestureRecognizer:navController.customBackGesture];
+        
+        navController.customBackGesture.delegate = navController.customBackGestureDelegate ;
+        
+        navController.interactivePopGestureRecognizer.delegate = nil;
+        navController.interactivePopGestureRecognizer.enabled  = NO;
+    }
 }
 
-
-- (BOOL)prefersStatusBarHidden {
-
+- (BOOL)prefersStatusBarHidden
+{
     return self.statusBarHidden;
 }
+
 
 @end
 

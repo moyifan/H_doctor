@@ -12,15 +12,12 @@
 #define CHINESE_SYSTEM(x) [UIFont fontWithName:CHINESE_FONT_NAME size:x]
 
 //不同屏幕尺寸字体适配（320，568是因为效果图为IPHONE5 如果不是则根据实际情况修改）
-//#define kScreenWidthRatio  (Main_Screen_Width / 320.0)
-//#define kScreenHeightRatio (Main_Screen_Height / 568.0)
+
 #define kScreenWidthRatio  (Main_Screen_Width / 375.0)
 #define kScreenHeightRatio (Main_Screen_Height / 667.0)
-//#define AdaptedWidth(x)  ceilf((x) * kScreenWidthRatio)
-#define AdaptedWidth(x) x
+#define AdaptedWidth(x)  ceilf((x) * kScreenWidthRatio)
 #define AdaptedHeight(x) ceilf((x) * kScreenHeightRatio)
-//#define AdaptedFontSize(R)     CHINESE_SYSTEM(AdaptedWidth(R))
-#define AdaptedFontSize(R) CHINESE_SYSTEM(R)
+#define AdaptedFontSize(R)     CHINESE_SYSTEM(AdaptedWidth(R))
 
 
 
@@ -51,6 +48,8 @@
 #define BOLDSYSTEMFONT(FONTSIZE)[UIFont boldSystemFontOfSize:FONTSIZE]
 #define SYSTEMFONT(FONTSIZE)    [UIFont systemFontOfSize:FONTSIZE]
 #define FONT(NAME, FONTSIZE)    [UIFont fontWithName:(NAME) size:(FONTSIZE)]
+
+//#define PingFangFONT(FONTSIZE)    [UIFont fontWithName:(@"PingFangSC-Medium") size:(FONTSIZE)]
 #define PingFangFONT(FONTSIZE)    [UIFont fontWithName:(@"PingFang SC") size:(FONTSIZE)]
 
 
