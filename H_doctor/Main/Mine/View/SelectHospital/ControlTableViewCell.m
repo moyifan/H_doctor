@@ -31,7 +31,6 @@
     _content = [[UILabel alloc] init];
     _content.font = PingFangFONT(16);
     _content.textColor = darkShenColor;
-    _content.text = @"武汉市";
     
     
     UIView *line = [[UIView alloc] init];

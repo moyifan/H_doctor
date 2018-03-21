@@ -10,4 +10,6 @@
 
 @interface SelevtHospitalViewController : UIViewController
 
+@property (nonatomic, copy) void (^ReturnValueBlock) (NSString *strValue,NSString *ID);
+
 @end

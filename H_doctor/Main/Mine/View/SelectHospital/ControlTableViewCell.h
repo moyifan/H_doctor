@@ -10,4 +10,6 @@
 
 @interface ControlTableViewCell : UITableViewCell
 
+@property (nonatomic,strong) UILabel *content;
+
 @end

@@ -12,9 +12,12 @@
 #import "TZImagePickerController.h"
 #import "TZImageManager.h"
 
+#import "UploadCertService.h"
 
 @interface CertificationViewController ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,TZImagePickerControllerDelegate>
 @property (nonatomic, strong)UIImagePickerController *imagePickerVc; // 图片选择器
+
+@property (nonatomic, strong)UITextField *cardID;
 
 @end
 
@@ -27,10 +30,10 @@
 {
     [self.navigationView setTitle:@"职业认证"];
     
-    MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+//    MPWeakSelf(self)
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
 }
 
@@ -77,6 +80,7 @@
     
     
     UITextField *cardID = [[UITextField alloc] init];
+    self.cardID = cardID;
     cardID.font = PingFangFONT(16);
     cardID.textColor = darkQianColor;
     cardID.textAlignment = NSTextAlignmentRight;
@@ -110,6 +114,7 @@
     
     UIImageView *uploadBtn = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"pic_unload"]];
     _uploadBtn = uploadBtn;
+    uploadBtn.userInteractionEnabled = YES;
     [uploadBtn sizeToFit];
     UITapGestureRecognizer *IDCardFrontTap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(didClickIDCardFront:)];
     IDCardFrontTap.numberOfTapsRequired = 1;
@@ -201,11 +206,12 @@
     
 }
 
+
+
 // 点击提交
 -(void)didClickSubmit
 {
-    
-   
+    [self uploadCert];
 }
 
 
@@ -344,6 +350,31 @@
 
 
 
+#pragma mark 网络
+
+-(void)uploadCert
+{
+    if ([self.cardID.text isEqualToString:@""] || [_uploadBtn.image isEqual:[UIImage imageNamed:@"pic_unload"]]) {
+        [MBProgressHUD showError:@"请输入完整信息" ToView:nil];
+        return;
+    }
+    
+    
+    UploadCertService *request = [[UploadCertService alloc] initWithDocid:DoctorUserDefault.ID certcode:self.cardID.text certimg:_uploadBtn.image];
+    
+    [request startWithCompletionBlockWithSuccess:^(__kindof YTKBaseRequest * _Nonnull request) {
+        NSLog(@"上传职业认证 %@",request.responseString);
+        if ([request.responseJSONObject[@"code"] isEqual:@1]) {
+            [MBProgressHUD showSuccess:@"上传成功，请等待审核" ToView:nil];
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    
+    } failure:^(__kindof YTKBaseRequest * _Nonnull request) {
+        NSLog(@"上传职业认证 %@",request.error);
+    }];
+    
+    
+}
 
 
 

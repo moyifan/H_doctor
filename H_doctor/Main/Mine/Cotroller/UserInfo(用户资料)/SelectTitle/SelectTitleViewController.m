@@ -22,10 +22,10 @@
     [self.navigationView setTitle:@"选择职称"];
     
     
-    MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+//    MPWeakSelf(self)
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
 }
 
@@ -47,7 +47,16 @@
 
 -(void)setupSubViews
 {
+    
     HospitalViewController *hospital = [[HospitalViewController alloc] init];
+    hospital.hospitalState = title;
+    
+    MPWeakSelf(self)
+    hospital.ReturnValueBlock = ^(NSString *str){
+        if (weakself.ReturnValueBlock) {
+            weakself.ReturnValueBlock(str);
+        }
+    };
     
     NSArray *childArr = @[hospital];
     /// pageContentView

@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = 'E558F29CEBE0F08D2E4C888036A2735F'
+               BlueprintIdentifier = '36482898EB77EC6435E52AD5273B7F9F'
                BlueprintName = 'EasyNavigation'
                ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'libEasyNavigation.a'>
+               BuildableName = 'EasyNavigation.framework'>
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

@@ -32,9 +32,9 @@
     [self.navigationView setTitle:@"收入管理"];
     
     MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
     [self.navigationView addRightButtonWithTitle:@"收入说明" clickCallBack:^(UIView *view) {
         IncomeStatementViewController *income = [[IncomeStatementViewController alloc] init];

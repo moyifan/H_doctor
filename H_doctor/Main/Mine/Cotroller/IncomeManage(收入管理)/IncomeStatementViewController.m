@@ -19,9 +19,9 @@
     [self.navigationView setTitle:@"收入说明"];
     
     MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
 }
 

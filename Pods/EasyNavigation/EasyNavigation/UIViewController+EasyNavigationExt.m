@@ -10,12 +10,14 @@
 #import "UIViewController+EasyNavigationExt.h"
 
 #import "EasyNavigationController.h"
-#import "EasyUtils.h"
+#import "EasyNavigationUtils.h"
+#import "EasyNavigationView+LeftButton.h"
 #import <objc/runtime.h>
 
 
 @implementation UIViewController (EasyNavigationExt)
 
+@dynamic navigationView ;
 
 - (BOOL)disableSlidingBackGesture
 {
@@ -50,59 +52,91 @@
 }
 
 
-- (EasyNavigationViewController *)vcEasyNavController
-{
-    return objc_getAssociatedObject(self, _cmd);
-}
-- (void)setVcEasyNavController:(EasyNavigationViewController *)vcEasyNavController
-{
-    objc_setAssociatedObject(self, @selector(vcEasyNavController), vcEasyNavController, OBJC_ASSOCIATION_ASSIGN);
-}
-
+//- (EasyNavigationController *)vcEasyNavController
+//{
+//    EasyNavigationController *vcNav=  objc_getAssociatedObject(self, _cmd);
+//    if (nil == vcNav) {
+//        vcNav = (EasyNavigationController *)self.navigationController ;
+//        objc_setAssociatedObject(self, @selector(vcEasyNavController), vcNav, OBJC_ASSOCIATION_ASSIGN);
+//    }
+//    return vcNav ;
+//}
 
 - (EasyNavigationView *)navigationView
 {
-    return objc_getAssociatedObject(self, _cmd);
-}
-- (void)setNavigationView:(EasyNavigationView *)navigationView
-{
-    objc_setAssociatedObject(self, @selector(navigationView), navigationView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    EasyNavigationView *navView = objc_getAssociatedObject(self, _cmd);
+    if (nil == navView) {
+        navView = [[EasyNavigationView alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth_N() , NavigationHeight_N())];
+        
+        if (!self.navigationController) {
+            NSAssert(NO, @"attention: this controller's navigationcontroller is null: %@",self);
+        }
+        if (self.navigationController.viewControllers.count > 1) {
+            UIImage *img = [UIImage imageNamed:EasyImageFile_N(@"nav_btn_back.png")] ;
+            if ([EasyNavigationOptions shareInstance].navigationBackButtonImage) {
+                img = [EasyNavigationOptions shareInstance].navigationBackButtonImage ;
+            }
+            NSString *title = @"      " ;
+            if ([EasyNavigationOptions shareInstance].navigationBackButtonTitle) {
+                title = [EasyNavigationOptions shareInstance].navigationBackButtonTitle ;
+            }
+            __weak typeof(self)weakSelf = self;
+            UIButton *backButton = [navView addLeftButtonWithTitle:title image:img clickCallBack:^(UIView *view) {
+                [weakSelf.navigationController popViewControllerAnimated:YES];
+            }];
+            navView.navigationBackButton = backButton ;
+        }
+
+        [self willChangeValueForKey:NSStringFromClass([EasyNavigationView class])];
+        objc_setAssociatedObject(self, @selector(navigationView), navView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        [self didChangeValueForKey:NSStringFromClass([EasyNavigationView class])];
+        [self.view addSubview:navView];
+        
+    }
+    return navView ;
 }
 
-- (CGFloat)navigationOrginalHeight
-{
-    CGFloat orginalHeight = STATUSBAR_HEIGHT + kNavNormalHeight ;
-    
-    if (self.isShowBigTitle) {
-        CGFloat additionalHeight = ISHORIZONTALSCREEM ? 0 : kNavBigTitleHeight ;
-        return orginalHeight + additionalHeight ;
-    }
-    
-    return orginalHeight ;
-}
+
+//- (CGFloat)navigationHeight
+//{
+//    CGFloat normalHeight = kNavNormalHeight_N + (ISHORIZONTA_N ? 0 : (ISIPHONE_X ?44:20));
+//
+////    NSLog(@"---%d",[UIDevice currentDevice].orientation);
+//    NSLog(@"===%f,%f,%@",self.view.width,self.view.height ,NSStringFromCGRect([UIApplication sharedApplication].statusBarFrame) );
+////    return normalHeight ;
+////
+////    CGFloat orginalHeight = kStatusBarHeight + kNavNormalHeight ;
+////
+////    if (self.isShowBigTitle) {
+////        CGFloat additionalHeight = ISHORIZONTALSCREEM ? 0 : kNavBigTitleHeight ;
+//////        return orginalHeight + additionalHeight + x;
+////    }
+//
+//    return normalHeight ;
+//}
 
 - (BOOL)isShowBigTitle
 {
-    if (ISHORIZONTALSCREEM) {//如果屏幕是水平方向，不要大标题
+    if (ScreenIsHorizontal_N()) {//如果屏幕是水平方向，不要大标题
         return NO ;
     }
     
     BOOL shouldShow = NO ;
     switch (self.navbigTitleType) {
         case NavBigTitleTypeIOS11:
-            shouldShow = IS_IOS11_OR_LATER ;
+//            shouldShow = IS_IOS11_OR_LATER ;
             break;
         case NavBigTitleTypePlus:
-            shouldShow = ISIPHONE_6P ;
+//            shouldShow = ISIPHONE_6P ;
             break ;
         case NavBigTitleTypeIphoneX:
-            shouldShow = ISIPHONE_X ;
+//            shouldShow = ISIPHONE_X ;
             break ;
         case NavBigTitleTypeAll :
             shouldShow = YES ;
             break ;
         case NavBigTitleTypePlusOrX:
-            shouldShow = ISIPHONE_X || ISIPHONE_6P ;
+//            shouldShow = ISIPHONE_X || ISIPHONE_6P ;
             break ;
         default:
             break;
@@ -186,15 +220,13 @@
     if (nil == navController) {
         return ;
     }
-    
-    if (self.disableSlidingBackGesture) {
-        navController.interactivePopGestureRecognizer.delegate = nil ;
-        navController.interactivePopGestureRecognizer.enabled = NO ;
-        return ;
+
+    if (navController.interactivePopGestureRecognizer.delegate != navController) {
+        navController.interactivePopGestureRecognizer.delegate = navController ;
     }
-    
-    navController.interactivePopGestureRecognizer.delegate = navController ;
-    navController.interactivePopGestureRecognizer.enabled = YES ;
+    if (!navController.interactivePopGestureRecognizer.enabled) {
+        navController.interactivePopGestureRecognizer.enabled = YES ;
+    }
     
     if (self.customBackGestureEnabel) {
         
@@ -202,9 +234,11 @@
         
         navController.customBackGesture.delegate = navController.customBackGestureDelegate ;
         
-        navController.interactivePopGestureRecognizer.delegate = nil;
-        navController.interactivePopGestureRecognizer.enabled  = NO;
+//        navController.interactivePopGestureRecognizer.delegate = nil;
+//        navController.interactivePopGestureRecognizer.enabled  = NO;
     }
+   
+
 }
 
 - (BOOL)prefersStatusBarHidden

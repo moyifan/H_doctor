@@ -8,6 +8,23 @@
 
 #import <UIKit/UIKit.h>
 
+#import "AllCityModel.h"
+
+typedef NS_ENUM(NSUInteger, HospitalState) {
+    title = 0,
+    hos = 1,
+};
+
+
+
 @interface HospitalViewController : UIViewController
+
+@property (nonatomic,assign) HospitalState hospitalState;
+
+@property (nonatomic, copy) void (^ReturnValueBlock) (NSString *strValue);
+
+@property (nonatomic,strong) NSArray<Hosptllist *> *hosModel;
+
+@property (nonatomic, copy) void (^ReturnHosValueBlock) (NSString *strValue, NSString *ID);
 
 @end

@@ -32,13 +32,11 @@
     _content = [[UILabel alloc] init];
     _content.font = PingFangFONT(16);
     _content.textColor = darkShenColor;
-    _content.text = @"神农架滑雪";
     
     
     _detail = [[UILabel alloc] init];
     _detail.font = PingFangFONT(16);
     _detail.textColor = darkShenColor;
-    _detail.text = @"12";
     
     
     UIView *line = [[UIView alloc] init];

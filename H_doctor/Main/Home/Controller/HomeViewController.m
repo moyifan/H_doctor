@@ -6,9 +6,18 @@
 //  Copyright © 2017年 zhiren. All rights reserved.
 //
 
+#import "AppDelegate.h"
 #import "HomeViewController.h"
 #import "HomeCollectionViewCell.h"
+#import "MyPharmacyViewController.h"
+#import "ContactAllRecordViewController.h"
+#import "ChatListViewController.h"
+#import "MyFeesViewController.h"
+#import "TemplateSettingViewController.h"
+#import "ReceptionSettingViewController.h"
+#import "ChatVideoListViewController.h"
 
+#import "PrescribePrescriptionViewController.h"
 
 @interface HomeViewController ()<UICollectionViewDelegate,UICollectionViewDataSource,UITableViewDelegate,UITableViewDataSource>
 
@@ -41,6 +50,8 @@
    
     
     [self.navigationView addRightButtonWithImage:[UIImage imageNamed:@"news_icon"] hightImage:nil clickCallBack:^(UIView *view) {
+        PrescribePrescriptionViewController *pre = [[PrescribePrescriptionViewController alloc] init];
+        [weakself.navigationController pushViewController:pre animated:YES];
     }];
     
     
@@ -199,7 +210,27 @@
 
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    
+    if (DoctorUserDefault.isLogin) {
+        
+        if (indexPath.row == 0) {
+            ChatVideoListViewController *video = [[ChatVideoListViewController alloc] init];
+            [self.navigationController pushViewController:video animated:YES];
+        }else if (indexPath.row == 1){
+            ChatListViewController *list = [[ChatListViewController alloc] init];
+            [self.navigationController pushViewController:list animated:YES];
+            //        [MBProgressHUD showAutoMessage:@"该功能暂未开放"];
+        }else if (indexPath.row == 2){
+            MyPharmacyViewController *myPhaarmacy = [[MyPharmacyViewController alloc] init];
+            [self.navigationController pushViewController:myPhaarmacy animated:YES];
+        }else{
+            MyFeesViewController *fees = [[MyFeesViewController alloc] init];
+            [self.navigationController pushViewController:fees animated:YES];
+        }
+        
+    }else{
+        [((AppDelegate *)AppDelegateInstance) setupLoginViewController];
+        
+    }
    
     
 }
@@ -328,8 +359,34 @@
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
+    
+    if (DoctorUserDefault.isLogin) {
+        
+        if (indexPath.row == 0) {
+            ContactAllRecordViewController *record = [[ContactAllRecordViewController alloc] init];
+            [self.navigationController pushViewController:record animated:YES];
+        }else if (indexPath.row == 1){
+            TemplateSettingViewController *setting = [[TemplateSettingViewController alloc] init];
+            [self.navigationController pushViewController:setting animated:YES];
+        }else{
+            ReceptionSettingViewController *reception = [[ReceptionSettingViewController alloc] init];
+            [self.navigationController pushViewController:reception animated:YES];
+        }
+        
+    }else{
+        [((AppDelegate *)AppDelegateInstance) setupLoginViewController];
+        
+    }
+    
 
 }
+
+
+
+
+
+
+
 
 
 @end

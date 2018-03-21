@@ -9,6 +9,11 @@
 #import "AppDelegate.h"
 #import "TabBarConfig.h"
 #import "LoginViewController.h"
+#import "YTKNetworkConfig.h"
+
+#import "ChatSocketCline.h"
+
+@import SocketIO;
 
 @interface AppDelegate ()
 
@@ -26,26 +31,104 @@
     //键盘统一收回处理
     [self configureBoardManager];
     
+    // 网络初始化
+    YTKNetworkConfig *config = [YTKNetworkConfig sharedConfig];
+//    config.baseUrl = @"http://smx.hnshlwyy.com/";
+    config.baseUrl = @"http://192.168.10.131";
+
+    
+    // 导航栏
     [self setNavBarAppearence];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor whiteColor];   //设置通用背景颜色
     
+    //云信
+    [self setupNIMSDK];
+    
+    // socket
+    [self setupSocket];
+
     
     [self setUpHomeViewController];
 
-//    if (DoctorUserDefault.isLogin) {
+    if (DoctorUserDefault.isLogin) {
     
-//        [self setupLoginViewController];
+        [[[NIMSDK sharedSDK] loginManager] login:DoctorUserDefault.ID token:DoctorUserDefault.Token completion:^(NSError * _Nullable error) {
+
+            if (!error) {
+                NSLog(@"登录成功 %@",DoctorUserDefault.ID);
+
+                [[UserInfo shareUserInfo] updateUserInfo];
+
+            }else{
+                NSLog(@"登录失败 %@",error);
+                DoctorUserDefault.isLogin = NO;
+                [self setupLoginViewController];
+                [[[NIMSDK sharedSDK] loginManager] logout:^(NSError *error){}];
+                [[ChatSocketCline shareSocketCline] disconnect];
+
+            }
+
+        }];
+        
     
-//    }else{
+    }else{
+        [self setupLoginViewController];
         DoctorUserDefault.ID = @"0";
-//    }
+    }
+
     
-    
+  
     
     
     return YES;
+}
+
+
+
+
+-(void)setupNIMSDK
+{
+    
+    //在注册 NIMSDK appKey 之前先进行配置信息的注册，如是否使用新路径,是否要忽略某些通知，是否需要多端同步未读数
+    //    self.sdkConfigDelegate = [[NTESSDKConfigDelegate alloc] init];
+    //    [[NIMSDKConfig sharedConfig] setDelegate:self.sdkConfigDelegate];
+    [[NIMSDKConfig sharedConfig] setShouldSyncUnreadCount:YES];
+    [[NIMSDKConfig sharedConfig] setMaxAutoLoginRetryTimes:10];
+    [[NIMSDKConfig sharedConfig] setEnabledHttpsForInfo:NO];
+    
+    
+    [[NIMSDK sharedSDK] registerWithAppID:kyunAppKey
+                                  cerName:@""];
+    
+    
+//    [[NIMSDK sharedSDK].systemNotificationManager addDelegate:self];
+//    [[NIMSDK sharedSDK].loginManager addDelegate:self];
+//    [[NIMAVChatSDK sharedSDK].netCallManager addDelegate:self];
+    
+    
+}
+
+
+
+-(void)setupSocket
+{
+    SocketIOClient *socket = [ChatSocketCline shareSocketCline];
+    
+    [socket on:@"connect" callback:^(NSArray* data, SocketAckEmitter* ack) {
+        NSLog(@"socket 连接成功");
+    }];
+    
+    [socket on:@"disconnect" callback:^(NSArray* data, SocketAckEmitter* ack) {
+        NSLog(@"socket 断开");
+    }];
+    
+    
+    [socket connectWithTimeoutAfter:5 withHandler:^{
+        NSLog(@"连接超时");
+    }];
+    
 }
 
 
@@ -72,6 +155,7 @@
     options.buttonTitleFont = PingFangFONT(16);
     options.buttonTitleColor = [UIColor whiteColor];
     options.navBackgroundImage = [UIImage imageNamed:@"bg_na"];
+    options.navigationBackButtonImage = [UIImage imageNamed:@"back_"];
 
     
 //    EasyNavigationView
@@ -88,7 +172,10 @@
 {
     [self.window endEditing:YES];
     
-    [self.tabBarConfig.tabBarController.selectedViewController presentViewController:self.loginVC animated:YES completion:nil];
+    EasyNavigationController *nav = [[EasyNavigationController alloc]initWithRootViewController:self.loginVC];
+    [self.tabBarConfig.tabBarController.selectedViewController presentViewController:nav animated:YES completion:nil];
+    
+//    [self.tabBarConfig.tabBarController.selectedViewController presentViewController:self.loginVC animated:YES completion:nil];
     
     
 }

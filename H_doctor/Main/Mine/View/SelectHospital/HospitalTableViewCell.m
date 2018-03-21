@@ -10,9 +10,6 @@
 
 @implementation HospitalTableViewCell
 
-{
-    UILabel *_content;
-}
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
@@ -32,7 +29,7 @@
     _content = [[UILabel alloc] init];
     _content.font = PingFangFONT(16);
     _content.textColor = darkShenColor;
-    _content.text = @"武汉市第一医院";
+    
     
     
     UIView *line = [[UIView alloc] init];

@@ -9,6 +9,7 @@
 #import "SignViewController.h"
 //#import "UINavigationController+FDFullscreenPopGesture.h"
 #import "BaibanView.h"
+#import "UploadSignImgService.h"
 
 @import Photos; // 相册权限
 
@@ -25,10 +26,10 @@
 {
     [self.navigationView setTitle:@"处方签名"];
    
-    MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+//    MPWeakSelf(self)
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
     
 }
@@ -114,19 +115,31 @@
 // 提交保存
 -(void)didClickSave
 {
-    [self loadImageFinished:[self.painterView capImage]];
+    [self uploadSign];
 }
 
 
-- (void)loadImageFinished:(UIImage *)image
-{
-    UIImageWriteToSavedPhotosAlbum(image, self, @selector(image:didFinishSavingWithError:contextInfo:), (__bridge void *)self);
-}
 
-- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo
-{
 
-//    NSLog(@"image = %@, error = %@, contextInfo = %@", image, error, contextInfo);
+
+#pragma mark 网络
+
+-(void)uploadSign
+{
+    
+    UploadSignImgService *request = [[UploadSignImgService alloc] initWithDocid:DoctorUserDefault.ID  signimg:[self.painterView capImage]];
+    
+    [request startWithCompletionBlockWithSuccess:^(__kindof YTKBaseRequest * _Nonnull request) {
+        NSLog(@"上传签名 %@",request.responseString);
+        if ([request.responseJSONObject[@"code"] isEqual:@1]) {
+            [MBProgressHUD showSuccess:@"上传成功，请等待审核" ToView:nil];
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+        
+    } failure:^(__kindof YTKBaseRequest * _Nonnull request) {
+        NSLog(@"上传签名 %@",request.error);
+    }];
+    
 }
 
 

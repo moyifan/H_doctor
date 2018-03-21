@@ -16,6 +16,7 @@
 #import "IncomeManageViewController.h"
 #import "SettingViewController.h"
 
+#import "AppDelegate.h"
 
 @interface MineViewController ()
 
@@ -44,6 +45,13 @@
     
 }
 
+-(void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
+    [self updateUserInfo];
+}
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -66,8 +74,10 @@
     // 添加约束
     [self setupSubviews];
     
+    [self updateUserInfo];
 
     [self onClickEvent];
+    
 }
 
 
@@ -87,7 +97,7 @@
     
     [self.view addSubview:self.realNameView];
     [self.view addSubview:self.jobView];
-    [self.view addSubview:self.moneyView];
+//    [self.view addSubview:self.moneyView];
     [self.view addSubview:self.signView];
     [self.view addSubview:self.settingView];
 
@@ -95,8 +105,8 @@
     
     self.realNameView.sd_layout.leftEqualToView(self.view).topSpaceToView(self.showView, 0).rightEqualToView(self.view).heightIs(AdaptedWidth(45));
     self.jobView.sd_layout.leftEqualToView(self.view).topSpaceToView(self.realNameView, 0).rightEqualToView(self.view).heightIs(AdaptedWidth(45));
-    self.moneyView.sd_layout.leftEqualToView(self.view).topSpaceToView(self.jobView, 0).rightEqualToView(self.view).heightIs(AdaptedWidth(45));
-    self.signView.sd_layout.leftEqualToView(self.view).topSpaceToView(self.moneyView, 0).rightEqualToView(self.view).heightIs(AdaptedWidth(45));
+//    self.moneyView.sd_layout.leftEqualToView(self.view).topSpaceToView(self.jobView, 0).rightEqualToView(self.view).heightIs(AdaptedWidth(45));
+    self.signView.sd_layout.leftEqualToView(self.view).topSpaceToView(self.jobView, 0).rightEqualToView(self.view).heightIs(AdaptedWidth(45));
     self.settingView.sd_layout.leftEqualToView(self.view).topSpaceToView(self.signView, 0).rightEqualToView(self.view).heightIs(AdaptedWidth(45));
     
     
@@ -107,6 +117,9 @@
 
 - (void)onClickEvent
 {
+    if (DoctorUserDefault.isLogin) {
+        
+    
     __weak typeof(self) weakSelf = self;
     self.realNameView.tapBlock = ^ {
         __strong typeof(self) pThis = weakSelf;
@@ -138,17 +151,76 @@
         [pThis.navigationController pushViewController:setting animated:YES];
     };
 
+       
+    }else{
+        [((AppDelegate *)AppDelegateInstance) setupLoginViewController];
+        
+    }
 }
 
 
 // 点击头像
 -(void)didClickHead:(UITapGestureRecognizer *)sender{
     
-    UserInfoViewController *userInfo = [[UserInfoViewController alloc] init];
+    if (DoctorUserDefault.isLogin) {
+        UserInfoViewController *userInfo = [[UserInfoViewController alloc] init];
+        
+        [self.navigationController pushViewController:userInfo animated:YES];
+    }else{
+        [((AppDelegate *)AppDelegateInstance) setupLoginViewController];
 
-    [self.navigationController pushViewController:userInfo animated:YES];
+    }
+  
 }
 
+
+
+
+// 赋值
+-(void)updateUserInfo
+{
+    [_headView sd_setImageWithURL:[NSURL URLWithString:[UserInfo shareUserInfo].model.doc.img] placeholderImage:[UIImage imageNamed:@"yishengtouxiang_icon"]];
+    
+    _nickName.text = [UserInfo shareUserInfo].model.doc.realname;
+
+    
+    if ([UserInfo shareUserInfo].model.doc.isaudit) {
+        _realNameView.rightLabel.text = @"已实名";
+        _realNameView.rightLabel.textColor = darkQianColor;
+    }else{
+        _realNameView.rightLabel.text = @"未实名";
+        _realNameView.rightLabel.textColor = [UIColor redColor];
+    }
+    
+    
+    if ([UserInfo shareUserInfo].model.doc.certaudit) {
+        _jobView.rightLabel.text = @"已认证";
+        _jobView.rightLabel.textColor = darkQianColor;
+    }else{
+        _jobView.rightLabel.text = @"未认证";
+        _jobView.rightLabel.textColor = [UIColor redColor];
+    }
+   
+    
+    _moneyView.rightLabel.text = [NSString stringWithFormat:@"余额:%.2f元",0.00];
+    
+    
+    if ([[UserInfo shareUserInfo].model.doc.signimg isEqualToString:@""]) {
+        
+        _signView.rightLabel.text = @"未添加";
+        _signView.rightLabel.textColor = [UIColor redColor];
+    }else{
+        _signView.rightLabel.text = @"已添加";
+        _signView.rightLabel.textColor = darkQianColor;
+    }
+    
+    
+    [_realNameView layoutSubviews];
+    [_jobView layoutSubviews];
+    [_moneyView layoutSubviews];
+    [_signView layoutSubviews];
+
+}
 
 
 #pragma mark 懒加载
@@ -157,7 +229,7 @@
 {
     if (!_headView) {
         
-        _headView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"yishengtouxiang_icon"]];
+        _headView = [[UIImageView alloc] init];
         _headView.layer.cornerRadius = 36;
         _headView.layer.masksToBounds = YES;
         _headView.userInteractionEnabled = YES;
@@ -180,7 +252,6 @@
         _nickName = [[UILabel alloc] init];
         _nickName.textColor = RGB(254, 254, 254);
         _nickName.font = [UIFont fontWithName:(@"PingFangSC-Semibold") size:19];
-        _nickName.text = @"Richard";
     }
     
     return _nickName;
@@ -196,8 +267,7 @@
         _realNameView = [[WRCellView alloc] initWithLineStyle:WRCellStyleIconLabel_LabelIndicator];
         _realNameView.leftIcon.image = [UIImage imageNamed:@"shimingrenzheng_icon"];
         _realNameView.leftLabel.text = @"实名认证";
-        _realNameView.rightLabel.text = @"未实名";
-        _realNameView.rightLabel.textColor = [UIColor redColor];
+       
         [_realNameView setLineStyleWithLeftEqualLabelLeft];
 
     }
@@ -215,8 +285,7 @@
         _jobView = [[WRCellView alloc] initWithLineStyle:WRCellStyleIconLabel_LabelIndicator];
         _jobView.leftIcon.image = [UIImage imageNamed:@"zhiyezigerenzheng_icon"];
         _jobView.leftLabel.text = @"职业资格认证";
-        _jobView.rightLabel.text = @"未认证";
-        _jobView.rightLabel.textColor = [UIColor redColor];
+    
         [_jobView setLineStyleWithLeftEqualLabelLeft];
 
     }
@@ -233,7 +302,6 @@
         _moneyView = [[WRCellView alloc] initWithLineStyle:WRCellStyleIconLabel_LabelIndicator];
         _moneyView.leftIcon.image = [UIImage imageNamed:@"shimingrenzheng_icon"];
         _moneyView.leftLabel.text = @"收入管理";
-        _moneyView.rightLabel.text = [NSString stringWithFormat:@"余额:%.2f元",0.00];
         _moneyView.rightLabel.textColor = darkQianColor;
         [_moneyView setLineStyleWithLeftEqualLabelLeft];
 
@@ -251,8 +319,7 @@
         _signView = [[WRCellView alloc] initWithLineStyle:WRCellStyleIconLabel_LabelIndicator];
         _signView.leftIcon.image = [UIImage imageNamed:@"chufangqianzi_icon"];
         _signView.leftLabel.text = @"处方签字";
-        _signView.rightLabel.text = @"未添加";
-        _signView.rightLabel.textColor = [UIColor redColor];
+       
         [_signView setLineStyleWithLeftEqualLabelLeft];
 
         
@@ -279,9 +346,6 @@
     return _settingView;
     
 }
-
-
-
 
 
 

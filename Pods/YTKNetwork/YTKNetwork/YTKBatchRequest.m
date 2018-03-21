@@ -39,12 +39,12 @@
     if (self) {
         _requestArray = [requestArray copy];
         _finishedCount = 0;
-        for (YTKRequest * req in _requestArray) {
-            if (![req isKindOfClass:[YTKRequest class]]) {
-                YTKLog(@"Error, request item must be YTKRequest instance.");
-                return nil;
-            }
-        }
+//        for (YTKRequest * req in _requestArray) {
+//            if (![req isKindOfClass:[YTKRequest class]]) {
+//                YTKLog(@"Error, request item must be YTKRequest instance.");
+//                return nil;
+//            }
+//        }
     }
     return self;
 }

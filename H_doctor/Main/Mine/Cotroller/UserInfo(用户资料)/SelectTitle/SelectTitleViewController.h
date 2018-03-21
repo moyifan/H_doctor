@@ -10,4 +10,6 @@
 
 @interface SelectTitleViewController : UIViewController
 
+@property (nonatomic, copy) void (^ReturnValueBlock) (NSString *strValue);
+
 @end

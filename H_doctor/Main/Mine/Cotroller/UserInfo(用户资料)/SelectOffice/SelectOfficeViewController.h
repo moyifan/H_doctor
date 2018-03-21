@@ -10,4 +10,6 @@
 
 @interface SelectOfficeViewController : UIViewController
 
+@property (nonatomic, copy) void (^ReturnValueBlock) (NSString *strValue,NSInteger ID);
+
 @end

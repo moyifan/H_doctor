@@ -24,9 +24,9 @@
 
     
     MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
 }
 
@@ -49,6 +49,14 @@
 -(void)setupSubViews
 {
     SelectCityViewController *selectCity = [[SelectCityViewController alloc] init];
+    selectCity.cityState = office;
+    
+    MPWeakSelf(self)
+    selectCity.ReturnValueBlock = ^(NSString *str , NSInteger ID){
+        if (weakself.ReturnValueBlock) {
+            weakself.ReturnValueBlock(str,ID);
+        }
+    };
     
     
     NSArray *childArr = @[selectCity];

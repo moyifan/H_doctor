@@ -9,17 +9,17 @@
 #import <UIKit/UIKit.h>
 
 
-@class EasyNavigationViewController ;
+@class EasyNavigationController ;
 
 #import "EasyNavigationView.h"
-#import "EasyUtils.h"
+#import "EasyNavigationUtils.h"
 
 @interface UIViewController (EasyNavigationExt)
 
 /**
  * 当前的导航控制器
  */
-@property (nonatomic, weak) EasyNavigationViewController *vcEasyNavController ;
+//@property (nonatomic, weak) EasyNavigationController *vcEasyNavController ;
 
 /**
  * 当前的导航条
@@ -32,7 +32,7 @@
  * 竖屏：statusBar的高度 + 正常高度 + 大标题高度(如果显示)
  * 横屏：statusBar的高度(如果显示) + 正常高度
  */
-@property (nonatomic,assign,readonly)CGFloat navigationOrginalHeight ;
+//@property (nonatomic,assign,readonly)CGFloat navigationHeight ;
 /**
  * 是否正在展示大标题
  */

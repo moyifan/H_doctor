@@ -10,4 +10,6 @@
 
 @interface HospitalTableViewCell : UITableViewCell
 
+@property (nonatomic,strong) UILabel *content;
+
 @end

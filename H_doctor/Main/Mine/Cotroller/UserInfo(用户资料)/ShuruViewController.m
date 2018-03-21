@@ -23,9 +23,9 @@
     [self.navigationView setTitle:self.titleShu];
     
     MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
   
     [self.navigationView addRightButtonWithTitle:@"提交" clickCallBack:^(UIView *view) {
@@ -34,6 +34,7 @@
         [weakself.navigationController popViewControllerAnimated:YES];
         
     }];
+    
     
 }
 

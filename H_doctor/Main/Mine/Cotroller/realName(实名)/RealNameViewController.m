@@ -13,6 +13,7 @@
 #import "MMPopupItem.h"
 #import "RealNamePresentController.h"
 
+#import "UploadIDCard.h"
 
 @interface RealNameViewController ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,TZImagePickerControllerDelegate>
 
@@ -32,10 +33,10 @@
 {
     [self.navigationView setTitle:@"实名认证"];
     
-    MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+//    MPWeakSelf(self)
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
 }
 
@@ -128,12 +129,9 @@
 
 -(void)didClickSubmit
 {
-    RealNamePresentController *present = [[RealNamePresentController alloc] init];
-    EasyNavigationController *nav = [[EasyNavigationController alloc] initWithRootViewController:present];
-
-    [self presentViewController:nav animated:YES completion:^{
-        
-    }];
+    
+    [self uploadIDCard];
+    
 }
 
 
@@ -288,7 +286,39 @@
 
 
 
+#pragma mark 网络
 
+-(void)uploadIDCard
+{
+    
+    if ([_IDCardFront.image isEqual:[UIImage imageNamed:@"zhengmian_icon"]] || [_IDCardBack.image isEqual:[UIImage imageNamed:@"fanmian_icon"]]) {
+        [MBProgressHUD showError:@"请输入完整信息" ToView:nil];
+        return;
+    }
+    
+    
+    UploadIDCard *request = [[UploadIDCard alloc] initWithDocid:DoctorUserDefault.ID front:_IDCardFront.image back:_IDCardBack.image];
+    
+    [request startWithCompletionBlockWithSuccess:^(__kindof YTKBaseRequest * _Nonnull request) {
+        NSLog(@"实名认证 %@",request.responseString);
+        if ([request.responseJSONObject[@"code"] isEqual:@1]) {
+            
+            RealNamePresentController *present = [[RealNamePresentController alloc] init];
+            EasyNavigationController *nav = [[EasyNavigationController alloc] initWithRootViewController:present];
+            
+            [self presentViewController:nav animated:YES completion:^{
+                
+                [self.navigationController popViewControllerAnimated:YES];
+
+            }];
+
+        }
+        
+    } failure:^(__kindof YTKBaseRequest * _Nonnull request) {
+        NSLog(@"实名认证 %@",request.error);
+    }];
+    
+}
 
 
 

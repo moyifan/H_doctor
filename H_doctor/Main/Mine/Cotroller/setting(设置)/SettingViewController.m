@@ -9,6 +9,8 @@
 #import "SettingViewController.h"
 #import "WRCellView.h"
 #import "ChangePhoneViewController.h"
+#import "AppDelegate.h"
+#import "ChatSocketCline.h"
 
 @interface SettingViewController ()
 @property (nonatomic, strong) WRCellView *changePhone;
@@ -22,9 +24,9 @@
     [self.navigationView setTitle:@"设置"];
     
     MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
 
 }
@@ -49,6 +51,22 @@
     
     self.changePhone.sd_layout.leftEqualToView(self.view).rightEqualToView(self.view).topSpaceToView(self.view, 11+64).heightIs(44);
     
+    
+    
+    // 退出
+    UIButton *close = [[UIButton alloc] init];
+    
+    [close setBackgroundColor:[UIColor whiteColor]];
+    [close setTitle:@"退出当前账户" forState:UIControlStateNormal];
+    [close setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    close.titleLabel.font = AdaptedFontSize(16);
+    [close addTarget:self action:@selector(didClickdisLogin) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.view addSubview:close];
+    
+    close.sd_layout.leftEqualToView(self.view).rightEqualToView(self.view).bottomSpaceToView(self.view,50).heightIs(44);
+    
+    
 }
 
 
@@ -62,6 +80,30 @@
     };
 
 }
+
+
+
+// 点击退出登录
+-(void)didClickdisLogin
+{
+    if (DoctorUserDefault.isLogin) {
+        
+        DoctorUserDefault.isLogin = NO;
+        DoctorUserDefault.ID = @"0";
+        [[[NIMSDK sharedSDK] loginManager] logout:^(NSError *error){}];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+        [[ChatSocketCline shareSocketCline] disconnect];
+        
+    }else{
+        
+        [((AppDelegate *)AppDelegateInstance) setupLoginViewController];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+        
+    }
+    
+}
+
+
 
 #pragma mark 懒加载
 

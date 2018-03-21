@@ -30,6 +30,10 @@ typedef void (^CYLPushOrPopCallback)(NSArray<__kindof UIViewController *> *viewC
 
 @property (nonatomic, readonly) UIControl *cyl_tabButton;
 
+@property (nonatomic, copy, setter=cyl_setContext:, getter=cyl_context) NSString *cyl_context;
+
+@property (nonatomic, assign, setter=cyl_setPlusViewControllerEverAdded:, getter=cyl_plusViewControllerEverAdded) BOOL cyl_plusViewControllerEverAdded;
+
 /*!
  * @attention 
    - 调用该方法前已经添加了系统的角标，调用该方法后，系统的角标并未被移除，只是被隐藏，调用 `-cyl_removeTabBadgePoint` 后会重新展示。
@@ -83,16 +87,16 @@ typedef void (^CYLPushOrPopCallback)(NSArray<__kindof UIViewController *> *viewC
  *@param viewController Pop 或 Push 到的“目标控制器”，由 completionHandler 的参数控制 Pop 和 Push 的细节。
  *@param animated Pop 或 Push 时是否带动画
  *@param callback 回调，如果传 nil，将进行 Push。callback 包含以下几个参数：
-                  *@param viewControllers 表示与“目标控制器”相同类型的控制器；
-                  *@param completionHandler 包含以下几个参数：
-                                            *@param shouldPop 是否 Pop
-                                            *@param viewControllerPopTo Pop 回的控制器
-                                            *@param shouldPopSelectTabBarChildViewController 在进行 Push 行为之前，是否 Pop 到当前 `NavigationController` 的栈底。
+                 * param : viewControllers 表示与“目标控制器”相同类型的控制器；
+                 * param : completionHandler 包含以下几个参数：
+                                            * param : shouldPop 是否 Pop
+                                            * param : viewControllerPopTo Pop 回的控制器
+                                            * param : shouldPopSelectTabBarChildViewController 在进行 Push 行为之前，是否 Pop 到当前 `NavigationController` 的栈底。
                                                                                              可能的值如下：
                                                                                              NO 如果上一个参数为 NO，下一个参数 index 将被忽略。
                                                                                              YES 会根据 index 参数改变 `TabBarController` 的 `selectedViewController` 属性。
                                                                                              注意：该属性在 Pop 行为时不起作用。
-                                             *@param index Pop 改变 `TabBarController` 的 `selectedViewController` 属性。
+                                             * param : index Pop 改变 `TabBarController` 的 `selectedViewController` 属性。
                                                            注意：该属性在 Pop 行为时不起作用。
 */
 - (void)cyl_pushOrPopToViewController:(UIViewController *)viewController
@@ -105,6 +109,6 @@ typedef void (^CYLPushOrPopCallback)(NSArray<__kindof UIViewController *> *viewC
  */
 - (void)cyl_pushViewController:(UIViewController *)viewController animated:(BOOL)animated;
 
-- (UIViewController *)cyl_getViewControllerInsteadIOfNavigationController;
+- (UIViewController *)cyl_getViewControllerInsteadOfNavigationController;
 
 @end

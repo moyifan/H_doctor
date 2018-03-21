@@ -69,6 +69,9 @@
 // 是否iPad
 #define isPad                   (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 
+#define kSafeArea_Top (kDevice_Is_iPhoneX? 44: 20)
+#define kSafeArea_Bottom (kDevice_Is_iPhoneX? 34: 0)
+
 // 是否空对象
 #define IS_NULL_CLASS(OBJECT) [OBJECT isKindOfClass:[NSNull class]]
 
@@ -169,7 +172,17 @@ dispatch_async(dispatch_get_main_queue(), block);\
 #define MPWeakSelf(type)  __weak typeof(type) weak##type = type;
 #define MPStrongSelf(type)  __strong typeof(type) type = weak##type;
 
+// chat里使用
+#define ESWeak(var, weakVar) __weak __typeof(&*var) weakVar = var
+#define ESStrong_DoNotCheckNil(weakVar, _var) __typeof(&*weakVar) _var = weakVar
+#define ESStrong(weakVar, _var) ESStrong_DoNotCheckNil(weakVar, _var); if (!_var) return;
 
+#define ESWeak_(var) ESWeak(var, weak_##var);
+#define ESStrong_(var) ESStrong(weak_##var, _##var);
+
+#define ESWeakSelf      ESWeak(self, __weakSelf);
+#define ESStrongSelf    ESStrong(__weakSelf, _self);
+//
 
 #ifdef DEBUG
 

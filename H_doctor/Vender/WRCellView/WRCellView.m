@@ -48,7 +48,8 @@ UIColor *CellRightTextColor = nil;
 {
     CellSelectedColor  = [UIColor colorWithRed:230/255.0 green:230/255.0 blue:230/255.0 alpha:1.0];
     CellNormalColor    = [UIColor whiteColor];
-    CellSegmentColor   = [UIColor colorWithRed:218/255.0 green:218/255.0 blue:218/255.0 alpha:1.0];
+//    CellSegmentColor   = [UIColor colorWithRed:218/255.0 green:218/255.0 blue:218/255.0 alpha:1.0];
+    CellSegmentColor = [UIColor colorWithRed:239/255.0 green:239/255.0 blue:239/255.0 alpha:1.0];
     CellLeftTextColor  = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1.0];
     CellRightTextColor = [UIColor colorWithRed:155/255.0 green:155/255.0 blue:155/255.0 alpha:1.0];
 }
@@ -220,7 +221,14 @@ UIColor *CellRightTextColor = nil;
     {
 
         CGSize rightLabelSize = [self.rightLabel.text sizeWithAttributes:@{NSFontAttributeName:PingFangFONT(kRightLabelFont)}];
+//        CGFloat rightLabelWidth  = rightLabelSize.width;
         CGFloat rightLabelWidth  = rightLabelSize.width;
+        CGFloat rightLabelWidthTemp = kScreenWidth - self.leftLabel.width - self.rightIndicator.width - kMargin*3;
+
+        if (rightLabelWidth>rightLabelWidthTemp) {
+            rightLabelWidth = rightLabelWidthTemp;
+        }
+
         CGFloat rightLabelHeight = rightLabelSize.height;
         if (rightTmpView)
         {
@@ -235,6 +243,8 @@ UIColor *CellRightTextColor = nil;
             self.rightLabel.frame = CGRectMake(rightLabelX, rightLabelY, rightLabelWidth, rightLabelHeight);
         }
         rightTmpView = self.rightLabel;
+        
+        
     }
     
     if (self.style & 0x100)
@@ -254,6 +264,9 @@ UIColor *CellRightTextColor = nil;
             self.rightIcon.frame = CGRectMake(rightIconX, rightIconY, rightIconWidth, rightIconHeight);
         }
     }
+    
+    
+    
     self.bottomLine.frame = CGRectMake(mCellBottomLineX, kSelfHeight - 0.5, kScreenWidth - mCellBottomLineX, kBottomLineHeight);
 }
 

@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 #import <UIKit/UIKit.h>
-#import "EasyUtils.h"
+#import "EasyNavigationUtils.h"
 
 
 @interface EasyNavigationOptions : NSObject
@@ -79,5 +79,9 @@
  */
 @property (nonatomic,strong)UIColor *buttonTitleColorHieght ;
 
-
+/**
+ * 系统返回按钮 图片/文字 更改
+ */
+@property (nonatomic,strong)UIImage *navigationBackButtonImage ;
+@property (nonatomic,strong)NSString *navigationBackButtonTitle ;
 @end

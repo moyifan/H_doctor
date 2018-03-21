@@ -10,4 +10,8 @@
 
 @interface DetailTableViewCell : UITableViewCell
 
+@property (nonatomic,strong) UILabel *content;
+
+@property (nonatomic,strong) UILabel *detail;
+
 @end

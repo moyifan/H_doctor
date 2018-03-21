@@ -9,8 +9,13 @@
 #import "HospitalViewController.h"
 #import "HospitalTableViewCell.h"
 
+#import "GetAllTagService.h"
+#import "AllTagModel.h"
+
 @interface HospitalViewController ()<UITableViewDelegate, UITableViewDataSource>
 @property (nonatomic,strong) UITableView *tableview;
+
+@property (nonatomic,strong) AllTagModel *tagModel;
 
 @end
 
@@ -20,6 +25,13 @@
     [super viewDidLoad];
     
     [self setupSubViews];
+    
+    if (_hospitalState == title) {
+        
+        [self getAllTag];
+        
+    }
+    
     
 }
 
@@ -50,7 +62,11 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 10;
+    if (_hospitalState == title) {
+        return self.tagModel.list.count;
+    }else{
+        return self.hosModel.count;
+    }
 }
 
 
@@ -60,6 +76,13 @@
     
     HospitalTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:Identifier];
     
+    if (_hospitalState == title) {
+        cell.content.text = self.tagModel.list[indexPath.row].tagname;
+    }else{
+        cell.content.text = self.hosModel[indexPath.row].hosptlname;
+
+    }
+
     //// 此步设置用于实现cell的frame缓存，可以让tableview滑动更加流畅 //////
     [cell useCellFrameCacheWithIndexPath:indexPath tableView:tableView];
     
@@ -69,9 +92,20 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
+    if (_hospitalState == title) {
+        if (self.ReturnValueBlock) {
+            self.ReturnValueBlock(self.tagModel.list[indexPath.row].tagname);
+        }
+    }else{
+        if (self.ReturnHosValueBlock) {
+            self.ReturnHosValueBlock(self.hosModel[indexPath.row].hosptlname, [NSString stringWithFormat:@"%ld",self.hosModel[indexPath.row].ID]);
+        }
+    }
+
+    
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 
@@ -80,6 +114,40 @@
 {
     return 44;
 }
+
+
+
+
+-(void)setHosModel:(NSArray<Hosptllist *> *)hosModel
+{
+    _hosModel = hosModel;
+    
+    [self.tableview reloadData];
+}
+
+
+
+
+#pragma mark 网络
+
+-(void)getAllTag
+{
+    GetAllTagService *request = [[GetAllTagService alloc] init];
+    
+    [request startWithCompletionBlockWithSuccess:^(__kindof YTKBaseRequest * _Nonnull request) {
+//        NSLog(@"全部职称 %@",request.responseString);
+        
+        self.tagModel = [AllTagModel yy_modelWithJSON:request.responseJSONObject];
+        
+        [self.tableview reloadData];
+        
+        
+    } failure:^(__kindof YTKBaseRequest * _Nonnull request) {
+        NSLog(@" %@",request.error);
+    }];
+    
+}
+
 
 
 

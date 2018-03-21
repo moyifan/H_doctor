@@ -10,11 +10,18 @@
 #import "SelectCityViewController.h"
 #import "SGPageView.h"
 #import "HospitalViewController.h"
+#import "SearchHospitalService.h"
+#import "AllCityModel.h"
 
 @interface SelevtHospitalViewController ()<UITextFieldDelegate,SGPageContentViewDelegate>
 @property (nonatomic,strong) UITextField *search;
 
 @property (nonatomic, strong) SGPageContentView *pageContentView;
+
+@property (nonatomic, strong) HospitalViewController *hos;
+
+//@property (nonatomic, strong) Hosptllist *hosModel;
+
 @end
 
 @implementation SelevtHospitalViewController
@@ -22,16 +29,15 @@
 -(void)setNavBar
 {
     
-    [self.navigationView addSubview:self.search clickCallback:^(UIView *view) {
-        
-        
-    }];
-    self.search.sd_layout.centerXEqualToView(self.navigationView).bottomSpaceToView(self.navigationView, 10).widthIs(322).heightIs(28);
+    [self.navigationView addTitleView:self.search];
     
-    MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+    self.search.sd_layout.bottomSpaceToView(self.navigationView, 10).widthIs(322).heightIs(28);
+    
+    
+//    MPWeakSelf(self)
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
 }
 
@@ -54,8 +60,32 @@
 -(void)setupSubViews
 {
     SelectCityViewController *selectCity = [[SelectCityViewController alloc] init];
+    selectCity.cityState = city;
 
+    
+    
     HospitalViewController *hospital = [[HospitalViewController alloc] init];
+    self.hos = hospital;
+    hospital.hospitalState = hos;
+    
+    
+    
+    MPWeakSelf(self)
+    selectCity.ReturnHosValueBlock = ^(NSArray<Hosptllist *> *hosList){
+        
+        [weakself.pageContentView setPageCententViewCurrentIndex:1];
+        
+        hospital.hosModel = hosList;
+        
+    };
+    
+    
+    hospital.ReturnHosValueBlock = ^(NSString *strValue, NSString *ID){
+        if (weakself.ReturnValueBlock) {
+            weakself.ReturnValueBlock(strValue,ID);
+        }
+    };
+    
     
     
     NSArray *childArr = @[selectCity,hospital];
@@ -75,12 +105,47 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
-    [self.pageContentView setPageCententViewCurrentIndex:1];
+    
+    [self searchByText:textField.text];
     
     return YES;
 }
 
 
+
+#pragma mark 网络
+
+-(void)searchByText:(NSString *)text
+{
+    [MBProgressHUD showLoadToView:nil];
+    
+    SearchHospitalService *request = [[SearchHospitalService alloc] initWithKeyword:text];
+    
+    [request startWithCompletionBlockWithSuccess:^(__kindof YTKBaseRequest * _Nonnull request) {
+        NSLog(@"全部医院 %@",request.responseString);
+        
+        if ([request.responseJSONObject[@"ds"] isEqual:@[]]) {
+            [MBProgressHUD hideHUD];
+            [MBProgressHUD showError:@"无搜索结果" ToView:nil];
+            return;
+        }
+        
+        
+        [MBProgressHUD hideHUD];
+        Citylist *hosModel = [Citylist yy_modelWithJSON:request.responseJSONObject];
+      
+        self.hos.hosModel = hosModel.hosptllist;
+        
+        [self.pageContentView setPageCententViewCurrentIndex:1];
+            
+        
+    } failure:^(__kindof YTKBaseRequest * _Nonnull request) {
+        NSLog(@" %@",request.error);
+    }];
+    
+    [self.pageContentView setPageCententViewCurrentIndex:1];
+
+}
 
 
 #pragma mark 懒加载

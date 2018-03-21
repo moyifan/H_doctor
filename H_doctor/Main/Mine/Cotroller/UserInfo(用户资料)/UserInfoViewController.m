@@ -18,6 +18,19 @@
 #import "SelectTitleViewController.h"
 #import "BeGoodViewController.h"
 
+#import "Helper.h"
+
+//网络
+#import "YTKBatchRequest.h"
+#import "UpdateUserIcon.h"
+#import "UpdateTagService.h"
+#import "UpdateSectionService.h"
+#import "UpdateExpertiseService.h"
+#import "UpdateRealNameService.h"
+#import "UpdateHospitalService.h"
+#import "UpdateGenderService.h"
+
+
 @interface UserInfoViewController ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,TZImagePickerControllerDelegate>
 @property (nonatomic, strong) WRCellView *iconView;
 @property (nonatomic, strong) WRCellView *realNameView;
@@ -32,6 +45,9 @@
 
 @property (nonatomic, strong)UIImagePickerController *imagePickerVc; // 图片选择器
 
+@property (nonatomic, assign) NSInteger officeID;
+@property (nonatomic, copy) NSString *hospitalID;
+
 
 @end
 
@@ -42,13 +58,13 @@
     [self.navigationView setTitle:@"基本资料"];
     
     MPWeakSelf(self)
-    [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
-        [weakself.navigationController popViewControllerAnimated:YES];
-    }];
+ //   [self.navigationView addLeftButtonWithImage:[UIImage imageNamed:@"back_"] clickCallBack:^(UIView *view) {
+   //     [weakself.navigationController popViewControllerAnimated:YES];
+   // }];
     
     [self.navigationView addRightButtonWithTitle:@"提交" clickCallBack:^(UIView *view) {
-        
-        
+       
+        [weakself updateUserInfo];
     }];
     
 }
@@ -176,18 +192,32 @@
         __strong typeof(self) pThis = weakSelf;
         SelevtHospitalViewController *shu = [[SelevtHospitalViewController alloc] init];
         [pThis.navigationController pushViewController:shu animated:YES];
+        shu.ReturnValueBlock = ^(NSString *str,NSString *ID){
+            pThis.hospitalView.rightLabel.text = str;
+            [pThis.hospitalView layoutSubviews];
+            pThis.hospitalID = ID;
+        };
     };
     
     self.officeView.tapBlock = ^ {
         __strong typeof(self) pThis = weakSelf;
         SelectOfficeViewController *shu = [[SelectOfficeViewController alloc] init];
         [pThis.navigationController pushViewController:shu animated:YES];
+        shu.ReturnValueBlock = ^(NSString *str,NSInteger ID){
+            pThis.officeView.rightLabel.text = str;
+            [pThis.officeView layoutSubviews];
+            pThis.officeID = ID;
+        };
     };
     
     self.TitleView.tapBlock = ^ {
         __strong typeof(self) pThis = weakSelf;
         SelectTitleViewController *shu = [[SelectTitleViewController alloc] init];
         [pThis.navigationController pushViewController:shu animated:YES];
+        shu.ReturnValueBlock = ^(NSString *str){
+            pThis.TitleView.rightLabel.text = str;
+            [pThis.TitleView layoutSubviews];
+        };
     };
     
     self.beGoodView.tapBlock = ^ {
@@ -219,9 +249,15 @@
         
         switch (index) {
             case 0:
+                if (![Helper checkCameraAuthorizationStatus]) {
+                    return;
+                }
                 [self takePhoto];
                 break;
             case 1:
+                if (![Helper checkPhotoLibraryAuthorizationStatus]) {
+                    return;
+                }
                 [self pushImagePickerController];
                 break;
                 
@@ -252,27 +288,17 @@
 
 // 相机
 - (void)takePhoto {
-    AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
-    if ((authStatus == AVAuthorizationStatusRestricted || authStatus == AVAuthorizationStatusDenied) && iOS7Later) {
-        // 无权限 做一个友好的提示
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        UIAlertView * alert = [[UIAlertView alloc]initWithTitle:@"无法使用相机" message:@"请在iPhone的""设置-隐私-相机""中允许访问相机" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"设置", nil];
-        [alert show];
-#define push @#clang diagnostic pop
-    } else { // 调用相机
-        UIImagePickerControllerSourceType sourceType = UIImagePickerControllerSourceTypeCamera;
-        if ([UIImagePickerController isSourceTypeAvailable: UIImagePickerControllerSourceTypeCamera]) {
-            self.imagePickerVc.sourceType = sourceType;
-            self.imagePickerVc.allowsEditing = YES;
-            if(iOS8Later) {
-                _imagePickerVc.modalPresentationStyle = UIModalPresentationOverCurrentContext;
-            }
-            [self presentViewController:_imagePickerVc animated:YES completion:nil];
+    
+    UIImagePickerControllerSourceType sourceType = UIImagePickerControllerSourceTypeCamera;
+    if ([UIImagePickerController isSourceTypeAvailable: UIImagePickerControllerSourceTypeCamera]) {
+        self.imagePickerVc.sourceType = sourceType;
+        self.imagePickerVc.allowsEditing = YES;
+        if(iOS8Later) {
+            _imagePickerVc.modalPresentationStyle = UIModalPresentationOverCurrentContext;
         }
-        
-        
+        [self presentViewController:_imagePickerVc animated:YES completion:nil];
     }
+    
 }
 
 #pragma mark 图片代理方法
@@ -391,7 +417,8 @@
         _iconView.leftLabel.text = @"头像";
         _iconView.rightIcon.layer.cornerRadius = 25;
         _iconView.rightIcon.layer.masksToBounds = YES;
-        _iconView.rightIcon.image = [UIImage imageNamed:@"yishengtouxiang_icon"];
+        [_iconView.rightIcon sd_setImageWithURL:[NSURL URLWithString:[UserInfo shareUserInfo].model.doc.img] placeholderImage:[UIImage imageNamed:@"yishengtouxiang_icon"]];
+
         
     }
     
@@ -403,8 +430,8 @@
     if (!_realNameView) {
         
         _realNameView = [[WRCellView alloc] initWithLineStyle:WRCellStyleLabel_Label];
-        _realNameView.leftLabel.text = @"昵称";
-        _realNameView.rightLabel.text = @"";
+        _realNameView.leftLabel.text = @"姓名";
+        _realNameView.rightLabel.text = [UserInfo shareUserInfo].model.doc.realname;
     }
     
     return _realNameView;
@@ -417,7 +444,7 @@
         
         _sexView = [[WRCellView alloc] initWithLineStyle:WRCellStyleLabel_Label];
         _sexView.leftLabel.text = @"性别";
-        _sexView.rightLabel.text = @"";
+        _sexView.rightLabel.text = [UserInfo shareUserInfo].model.doc.gender;
     }
     
     return _sexView;
@@ -429,7 +456,8 @@
         
         _phoneView = [[WRCellView alloc] initWithLineStyle:WRCellStyleLabel_Label];
         _phoneView.leftLabel.text = @"手机号";
-        _phoneView.rightLabel.text = @"";
+        _phoneView.rightLabel.text = [UserInfo shareUserInfo].model.doc.tel;
+        _phoneView.userInteractionEnabled = NO;
         [_phoneView setLineStyleWithLeftZero];
 
     }
@@ -443,8 +471,9 @@
     if (!_certificateView) {
         
         _certificateView = [[WRCellView alloc] initWithLineStyle:WRCellStyleLabel_Label];
+        _certificateView.userInteractionEnabled = NO;
         _certificateView.leftLabel.text = @"证书编号";
-        _certificateView.rightLabel.text = @"";
+        _certificateView.rightLabel.text = [UserInfo shareUserInfo].model.doc.certcode;
         
     }
     
@@ -457,8 +486,8 @@
         
         _hospitalView = [[WRCellView alloc] initWithLineStyle:WRCellStyleLabel_LabelIndicator];
         _hospitalView.leftLabel.text = @"所在医院";
-        _hospitalView.rightLabel.text = @"";
-        
+        _hospitalView.rightLabel.text = [UserInfo shareUserInfo].model.doc.govname;
+        _hospitalID = [NSString stringWithFormat:@"%ld",[UserInfo shareUserInfo].model.doc.hospitalid];
     }
     
     return _hospitalView;
@@ -470,7 +499,8 @@
         
         _officeView = [[WRCellView alloc] initWithLineStyle:WRCellStyleLabel_LabelIndicator];
         _officeView.leftLabel.text = @"所在科室";
-        _officeView.rightLabel.text = @"";
+        _officeView.rightLabel.text = [UserInfo shareUserInfo].model.doc.sectionname;
+        _officeID = [UserInfo shareUserInfo].model.doc.sectionid;
         
     }
     
@@ -484,7 +514,7 @@
         
         _TitleView = [[WRCellView alloc] initWithLineStyle:WRCellStyleLabel_LabelIndicator];
         _TitleView.leftLabel.text = @"职称";
-        _TitleView.rightLabel.text = @"";
+        _TitleView.rightLabel.text = [UserInfo shareUserInfo].model.doc.title;
         
     }
     
@@ -497,7 +527,7 @@
         
         _beGoodView = [[WRCellView alloc] initWithLineStyle:WRCellStyleLabel_LabelIndicator];
         _beGoodView.leftLabel.text = @"擅长";
-        _beGoodView.rightLabel.text = @"";
+        _beGoodView.rightLabel.text = [UserInfo shareUserInfo].model.doc.expertise;
         
     }
     
@@ -506,4 +536,70 @@
 
 
 
+
+#pragma mark 网络
+
+-(void)updateUserInfo
+{
+    [MBProgressHUD showLoadToView:nil];
+
+    NSMutableArray *requestArray = [NSMutableArray array];
+    
+
+    UpdateUserIcon *updateIcon = [[UpdateUserIcon alloc] initWithDocid:DoctorUserDefault.ID Img:self.iconView.rightIcon.image];
+    
+    UpdateRealNameService *updateName = [[UpdateRealNameService alloc] initWithDocid:DoctorUserDefault.ID realname:self.realNameView.rightLabel.text];
+    
+    UpdateTagService *updateTag = [[UpdateTagService alloc] initWithDocid:DoctorUserDefault.ID tagname:self.TitleView.rightLabel.text];
+  
+    UpdateSectionService *updateSection = [[UpdateSectionService alloc] initWithDocid:DoctorUserDefault.ID sectionid:[NSString stringWithFormat:@"%ld",self.officeID]];
+    
+    UpdateHospitalService *updateHospital = [[UpdateHospitalService alloc] initWithDocid:DoctorUserDefault.ID hosptlid:self.hospitalID];
+    
+    NSString *sex;
+    if ([self.sexView.rightLabel.text isEqualToString:@"男"]) {
+        sex = @"1";
+    }else{
+        sex = @"2";
+    }
+    
+    UpdateGenderService *updateGender = [[UpdateGenderService alloc] initWithDocid:DoctorUserDefault.ID gender:sex];
+    
+    
+    UpdateExpertiseService *updateExpertise = [[UpdateExpertiseService alloc] initWithDocid:DoctorUserDefault.ID expertise:self.beGoodView.rightLabel.text];
+    
+    
+    [requestArray addObject:updateIcon];
+    [requestArray addObject:updateName];
+    [requestArray addObject:updateTag];
+    [requestArray addObject:updateSection];
+    [requestArray addObject:updateExpertise];
+    [requestArray addObject:updateHospital];
+    [requestArray addObject:updateGender];
+    
+
+    YTKBatchRequest *batchRequest = [[YTKBatchRequest alloc] initWithRequestArray:requestArray];
+    [batchRequest startWithCompletionBlockWithSuccess:^(YTKBatchRequest *batchRequest) {
+//        NSLog(@"success %@ ",batchRequest.requestArray);
+
+        [[UserInfo shareUserInfo] updateUserInfo];
+        [MBProgressHUD hideHUD];
+        [self.navigationController popViewControllerAnimated:YES];
+
+
+    } failure:^(YTKBatchRequest *batchRequest) {
+        NSLog(@"faile %@ ",batchRequest.failedRequest);
+        [MBProgressHUD hideHUD];
+        [MBProgressHUD showError:@"网络错误" ToView:nil];
+
+    }];
+    
+    
+}
+
+
+
+
+
 @end
+
